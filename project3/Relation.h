@@ -1,10 +1,33 @@
+#pragma once
+#include <stdio.h>
+#include <iostream>
+#include<string>
+#include <algorithm>
+#include <sstream>
+#include<set>
+#include<vector>
+#include "Tuple.h"
+using namespace std;
+
 class Relation
 {
 private:
     /* data */
+    string my_name;
+    Tuple my_header;
+    set<Tuple> my_set;
+
+
 public:
-    Relation(/* args */);
+    Relation(string name, Tuple header);
+    Relation();
     ~Relation();
+    string toString();
+    void addTuple(Tuple my_tuple);
+    void select(Relation& r, int col, string val);
+    void select(Relation& r, int col1, int col2);
+    void project(Relation& r, vector<int> toProject);
+    void rename(Relation& r, Tuple t);
 };
 
 

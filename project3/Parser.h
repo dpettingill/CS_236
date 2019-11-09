@@ -18,6 +18,7 @@ private:
 public:
     Parser(vector<Token> tokens);
     ~Parser();
+    DatalogProgram getDatalogProgram();
     void parse();
     void match(TokenType match_token_type);
     TokenType peekNextTokenType();

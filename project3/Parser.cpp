@@ -14,6 +14,10 @@ Parser::~Parser()
 {
 }
 
+DatalogProgram Parser::getDatalogProgram() {
+    return my_dp;
+}
+
 TokenType Parser::peekNextTokenType() {
     Token my_tok = parser_tokens.at(vect_pos);
     return my_tok.getTokenType();
@@ -263,8 +267,8 @@ void Parser::parse() {
             std::cout << "Failure!\n";
             return;
         }
-    std::cout << "Success!\n";
-    std::cout << my_dp.toString(); //print out my stuff!
+    // std::cout << "Success!\n";
+    // std::cout << my_dp.toString(); //print out my stuff!
     
 }
 

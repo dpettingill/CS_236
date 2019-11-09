@@ -1,4 +1,8 @@
+#pragma once
 #include "DatalogProgram.h"
+#include "Database.h"
+#include "Relation.h"
+#include "Tuple.h"
 #include <stdio.h>
 using namespace std;
 
@@ -6,9 +10,16 @@ class Interpreter
 {
 private:
     DatalogProgram my_dp;
+    Database my_database;
+    vector<Predicate> my_facts;
+    vector<Predicate> my_schemes;
 public:
-    Interpreter(DatalogProgram my_dp);
+    Interpreter(DatalogProgram my_data_p);
     ~Interpreter();
+    void makeTuples();
+    void makeRelations();
+
+
 };
 
 

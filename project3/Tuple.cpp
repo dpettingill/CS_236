@@ -1,8 +1,5 @@
 #include "Tuple.h"
 
-Tuple::Tuple(/* args */)
-{
-}
-Tuple::~Tuple()
-{
-}
+Tuple::Tuple(/* args */){}
+Tuple::~Tuple() {}
+

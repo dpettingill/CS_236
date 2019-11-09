@@ -1,10 +1,22 @@
+#pragma once
+#include <map>
+#include <string>
+#include "Relation.h"
+#include <stdio.h>
+using namespace std;
+
 class Database
 {
 private:
     /* data */
+    map<string, Relation> my_map; //string identifiers, holds Relations
+
 public:
     Database(/* args */);
     ~Database();
+    void addTuple(string name, Tuple t);
+    void addRelation(string name, Relation r);
+    string toString();
 };
 
 

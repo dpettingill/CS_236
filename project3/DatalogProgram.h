@@ -25,6 +25,10 @@ public:
     void addRule(Rule my_rule);
     void addQuery(Predicate my_query);
     void Domain();
+    vector<Predicate> getFacts();
+    vector<Predicate> getSchemes();
+    vector<Predicate> getQueries();
+    vector<Rule> getRules();
     string toString();
 };
 

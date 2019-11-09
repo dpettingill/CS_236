@@ -108,3 +108,16 @@ string DatalogProgram::toString() {
 
     return my_dp_strm.str();
 }
+
+    vector<Predicate> DatalogProgram::getFacts(){
+        return facts_v;
+    }
+    vector<Predicate> DatalogProgram::getSchemes(){
+        return schemes_v;
+    }
+    vector<Predicate> DatalogProgram::getQueries(){
+        return queries_v;
+    }
+    vector<Rule> DatalogProgram::getRules(){
+        return rules_v;
+    }
