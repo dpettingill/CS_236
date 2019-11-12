@@ -10,6 +10,7 @@ private:
 public:
     using vector::push_back; //specify which vect funcitons you are using
     using vector::at;
+    using vector::erase;
     Tuple(/* args */);
     ~Tuple();
 };

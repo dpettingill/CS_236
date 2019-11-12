@@ -18,6 +18,7 @@ public:
     ~Interpreter();
     void makeTuples();
     void makeRelations();
+    void evaluateQueries();
 
 
 };

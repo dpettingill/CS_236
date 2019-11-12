@@ -19,15 +19,18 @@ private:
 
 
 public:
-    Relation(string name, Tuple header);
+    //Relation(string name, Tuple header);
     Relation();
     ~Relation();
     string toString();
     void addTuple(Tuple my_tuple);
-    void select(Relation& r, int col, string val);
-    void select(Relation& r, int col1, int col2);
-    void project(Relation& r, vector<int> toProject);
-    void rename(Relation& r, Tuple t);
+    void fillRelation(Relation& r);
+    Relation select(int col, string val);
+    Relation select(int col1, int col2);
+    Relation project(vector<int> toProject);
+    
+    void setHeader(Tuple t);
+    void setName(string name);
 };
 
 

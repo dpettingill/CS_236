@@ -28,3 +28,7 @@ string Database::toString() {
     return ss.str();
 }
 
+Relation Database::getRelation(string name) {
+    return my_map.at(name);
+}
+

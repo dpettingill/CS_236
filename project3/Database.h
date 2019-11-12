@@ -17,6 +17,7 @@ public:
     void addTuple(string name, Tuple t);
     void addRelation(string name, Relation r);
     string toString();
+    Relation getRelation(string name);
 };
 
 
