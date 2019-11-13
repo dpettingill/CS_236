@@ -13,12 +13,17 @@ private:
     Database my_database;
     vector<Predicate> my_facts;
     vector<Predicate> my_schemes;
+    vector<Predicate> my_queries; //use this for final output
+    vector<vector<string>> queries; //use this for evaluating not the final output 
+    stringstream ss; //for printing out the final output
 public:
     Interpreter(DatalogProgram my_data_p);
     ~Interpreter();
+    void testCases();
     void makeTuples();
     void makeRelations();
-    void evaluateQueries();
+    void evaluateQuery(vector<string> query);
+    void decoupleQueries();
 
 
 };

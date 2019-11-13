@@ -18,6 +18,7 @@ public:
     void addRelation(string name, Relation r);
     string toString();
     Relation getRelation(string name);
+    void eraseRelation(string name);
 };
 
 

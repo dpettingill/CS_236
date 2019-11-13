@@ -28,7 +28,9 @@ public:
     Relation select(int col, string val);
     Relation select(int col1, int col2);
     Relation project(vector<int> toProject);
-    
+    Relation rename(Tuple t);
+    Tuple getHeader();
+    int getSetSize();
     void setHeader(Tuple t);
     void setName(string name);
 };

@@ -32,3 +32,6 @@ Relation Database::getRelation(string name) {
     return my_map.at(name);
 }
 
+void Database::eraseRelation(string name) {
+    my_map.erase(name);
+}

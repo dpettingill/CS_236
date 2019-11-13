@@ -16,22 +16,42 @@ Relation::~Relation()
 
     string Relation::toString(){
         stringstream ss;
-        //header toString();
-        ss << "Header = ( ";
-        for (string s: my_header) {
-            ss << s << ", ";
-        }
-        ss << ")\n";
+        int i = 0;
         for (Tuple t : my_set) {
-            ss << "Tuple = ( ";
-            //tuple toString()
-            for (string s : t) {
-                ss << s << ", "; // of the form N='12345'
+            //ss << "  ";
+            for(Tuple::iterator it = t.begin(); it != t.end(); ++it) {
+                if (it == t.begin()) ss << "  ";
+                if (it+1 < t.end()) {
+                    ss << my_header.at(i) << "=" << t.at(i) << ", "; // of the form N='12345'
+                    i++;
+                }
+                else ss << my_header.at(i) << "=" << t.at(i) << "\n";
             }
-            ss << ")\n";
+            
+            i = 0; //reset i
+            // ss << "\n";
         }
         return ss.str();
 }
+
+// string Relation::toString(){
+//         stringstream ss;
+//         //header toString();
+//         ss << " = ( ";
+//         for (string s: my_header) {
+//             ss << s << ", ";
+//         }
+//         ss << ")\n";
+//         for (Tuple t : my_set) {
+//             ss << " = ( ";
+//             //tuple toString()
+//             for (string s : t) {
+//                 ss << s << ", "; // of the form N='12345'
+//             }
+//             ss << ")\n";
+//         }
+//         return ss.str();
+// }
 
     void Relation::addTuple(Tuple my_tuple) {
         my_set.insert(my_tuple);
@@ -48,6 +68,8 @@ Relation::~Relation()
 
     Relation Relation::select(int col, string val) {
         Relation copy;
+        copy.setHeader(my_header);
+        copy.setName(my_name);
         for (Tuple t : my_set) {
             if (t.at(col) == val) {
                 copy.my_set.insert(t);
@@ -86,10 +108,27 @@ Relation::~Relation()
         }
         return copy;
     }
+
+    //when you make a function just to meet lab reqs lol
+    Relation Relation::rename(Tuple t) {
+        Relation r;
+        fillRelation(r);
+        r.setHeader(t);
+        return r;
+    }
+
     void Relation::setHeader(Tuple t){
         my_header = t;
     }
 
     void Relation::setName(string name) {
         my_name = name;
+    }
+
+    Tuple Relation::getHeader() {
+        return my_header;
+    }
+
+    int Relation::getSetSize() {
+        return my_set.size();
     }
