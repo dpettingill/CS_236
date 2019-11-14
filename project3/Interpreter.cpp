@@ -115,7 +115,7 @@ followed by a project, followed by a rename.*/
 void Interpreter::decoupleQueries() {
     Relation r;
     unordered_map<string, int> mapping;
-    mapping.reserve(100); //initialize this to something huge so it doesn't resize and jumble everything up
+    mapping.reserve(1000); //initialize this to something huge so it doesn't resize and jumble everything up
     string s = "";
     string name = "";
     unordered_map<string, int>::iterator it;
