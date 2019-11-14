@@ -1,3 +1,5 @@
 g++ -Wall -Werror -std=c++17 -g *.cpp -o lab3
 ./lab3 in10.txt > actual.txt
 diff out10.txt actual.txt
+//for powershell
+compare-object (get-content one.txt) (get-content two.txt)

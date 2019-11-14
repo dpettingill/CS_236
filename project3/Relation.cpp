@@ -24,7 +24,7 @@ Relation::~Relation()
                 if (it+1 < t.end()) {
                     ss << my_header.at(i) << "=" << t.at(i) << ", "; // of the form N='12345'
                     i++;
-                }
+                }                 
                 else ss << my_header.at(i) << "=" << t.at(i) << "\n";
             }
             
@@ -33,25 +33,6 @@ Relation::~Relation()
         }
         return ss.str();
 }
-
-// string Relation::toString(){
-//         stringstream ss;
-//         //header toString();
-//         ss << " = ( ";
-//         for (string s: my_header) {
-//             ss << s << ", ";
-//         }
-//         ss << ")\n";
-//         for (Tuple t : my_set) {
-//             ss << " = ( ";
-//             //tuple toString()
-//             for (string s : t) {
-//                 ss << s << ", "; // of the form N='12345'
-//             }
-//             ss << ")\n";
-//         }
-//         return ss.str();
-// }
 
     void Relation::addTuple(Tuple my_tuple) {
         my_set.insert(my_tuple);

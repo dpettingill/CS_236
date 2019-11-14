@@ -114,10 +114,11 @@ followed by a project, followed by a rename.*/
 
 void Interpreter::decoupleQueries() {
     Relation r;
-    map<string, int> mapping;
+    unordered_map<string, int> mapping;
+    mapping.reserve(100); //initialize this to something huge so it doesn't resize and jumble everything up
     string s = "";
     string name = "";
-    map<string, int>::iterator it;
+    unordered_map<string, int>::iterator it;
     vector<int> toProject;
     int cnt = 0; //keeps track of important tokens in queries ie names, vars and consts
     for (Predicate p: my_queries) { //will perform this on every fact in my_facts
@@ -151,7 +152,7 @@ void Interpreter::decoupleQueries() {
                 cnt++; //important token seen, increment
             }
             s = ""; //reset s    
-        }
+        }        
         //yes/no
         int size = r.getSetSize();
         if (size > 0) {
@@ -167,14 +168,15 @@ void Interpreter::decoupleQueries() {
         //rename
         it = mapping.begin(); //put an iterator to the map beginning
         Tuple t = r.getHeader(); //get the current header
-        int j = 0;
+        int j;
+        j = t.size()-1;
+        // int j = 0;
         while (it != mapping.end()) { //go until you reach the end
             t.at(j) = it->first;
             it++;
-            j++;
+            j--;
         }
         r = r.rename(t); //rename r
-
         mapping.clear(); //clear the map of this query
         name = ""; //reset name
         cnt = 0; //reset cnt
