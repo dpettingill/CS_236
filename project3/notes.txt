@@ -3,3 +3,8 @@ g++ -Wall -Werror -std=c++17 -g *.cpp -o lab3
 diff out10.txt actual.txt
 //for powershell
 compare-object (get-content one.txt) (get-content two.txt)
+
+cd the correct directory
+git add . //add all of the files
+git commit -m "make a comment" //commit your changes
+git push origin master //push the files to git hub

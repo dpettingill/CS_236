@@ -1,0 +1,69 @@
+1. implement natural join - (the major portion of this lab)
+    - join is always possible.
+        - if none of the headers match then we just do a cartesian product
+    - matchingColumns()
+        - go through and find which headers match each other
+        - keep track of these headers in some way (vector of pairs, two diff vectors of ints etc)
+    - findUniqueColumns()
+        - find the unique columns of the 2nd relation
+        - once you have found all of your matching columns then all the rest of the columns must be unique
+        - keep track with a vector of ints
+    - combineColumns()
+    - join (the fun part)
+        for (tuple t1 : in R1)
+            for (tuple t2 : in R2)
+                if (isJoinable(t1, t2, matchingColumns())) //isJoinable returns a boolean (loop through and check col sizes)
+                    //combineTuples /*adds in what you already have in the tuple
+                    then add in the tuple information from your unique columns in R2*/
+                    t3 = combineTuples(t, t2, uniqueCols)
+                    resultRelation.add(t3);
+        return resultRelation;
+    isJoinable(t1, t2, vector matchingCols)
+        for each match in matchingCols (vector of pairs of matching columns) {
+           if (t1[matchingCols1] != t2[matchingCols2])
+                return false;
+        }
+        return true; //if it looped through all of the matching columns and didn't break out returning false then return true
+2. evaluateRules
+    - if you have a rule that only has one body predicate
+        - sweet. You don't have to join anything and you are done
+    - else loop through and join all the relations on the right hand side of the :- 
+    - and then on the left hand side project those columns and rename as necessary
+    psuedo code:
+    evaluateRules() {
+        Relation result;
+        for (predicate p : body_predicates) {
+            //treat each body predicate as a query before you join them. bc if you have a constant in the predicate
+            // in will shrink your relation significantly and speed up your joins so you finish in time
+            if (i == 0)
+                result = EvalQuery(body[i])
+            else 
+                result = result.join(EvalQuery[i]); //evaluates and joins it to your result
+        }
+        findProjectCols() //gets the columns to project from headPredicate
+        result = result.project()
+        result = result.rename();
+        result = dB[headPredicate.name()].unionize(result);
+    }
+    
+3. Unionize - (this is easy like 10 lines of code)
+unionize(Relation result) {
+    for(tuple t: result) {
+        if (tupleSet.insert(t).second) //this does the insert and then tells you if it inserted
+                                        //second is a boolean saying whether it inserted or not
+            cout << t;
+        else 
+            //do nothing 
+    }
+}
+
+4. fixed point Algorithm
+    - first we need to calculate the number of tuples in our database upfront - call it precount
+        - just loop through your map and add up the sum of all the tuples
+    do {
+    findPreCount();
+    - for (Rule r : my_rules) {
+        evalutateOneRule(r);
+    }
+    findPostCount();
+    } while(pre_count != post_count)
