@@ -23,12 +23,15 @@ public:
     ~Interpreter();
     void testCases();
     void joinTestCases();
+    void evalRuleTestCases();
     void makeTuples();
     void makeRelations();
     void decoupleQueries();
     Relation evaluateQuery(Predicate p);
-    void evaluateRule();
+    void evaluateRule(vector<Predicate> preds);
+    Relation evaluateRule(vector<Predicate> preds, Relation r); //test version
     void evaluateRules();
+    void findProjectCols(Predicate p, Relation r);
 };
 
 

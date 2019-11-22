@@ -4,8 +4,8 @@
 unordered_map<string, int> mapping;
 unordered_map<string, int>::iterator it;
 vector<int> toProject;
-vector<Predicate> rule_preds;
 int cnt = 0; //keeps track of important tokens in queries ie names, vars and consts
+string new_name;
 
 //part A
 Interpreter::Interpreter(DatalogProgram my_data_p)
@@ -15,14 +15,15 @@ Interpreter::Interpreter(DatalogProgram my_data_p)
     my_facts = my_dp.getFacts();
     my_queries = my_dp.getQueries();
     my_rules = my_dp.getRules();
-    rule_preds.reserve(100);
     makeRelations();
     makeTuples();
+    mapping.reserve(1000); //initialize this to something huge so it doesn't resize and jumble everything up
     //evaluating rules
     // joinTestCases();
+    evalRuleTestCases();
     //evaluating queries
-    decoupleQueries();
-    cout << ss.str();
+    // decoupleQueries();
+    // cout << ss.str();
 }
 
 void Interpreter::testCases() {
@@ -67,6 +68,18 @@ void Interpreter::joinTestCases() {
     cout << "testing join where headers match but no tuple info:\n";
     Relation result3 = r1.naturalJoin(r3);
     cout << result3.toString() << endl;
+}
+
+
+void Interpreter::evalRuleTestCases() {
+    Relation r1;
+    r1 = evaluateRule(my_rules.at(0).getPreds(), r1); //evaluate the first rule
+    cout << "now the final output\n" << r1.toString();
+
+    Relation r2;
+    r2 = evaluateRule(my_rules.at(1).getPreds(), r2); //evaluate the first rule
+    cout << "now the final output\n" << r2.toString();
+    // evaluateRules();
 }
 
 // Predicate my_p(tok_vec, length, my_type);//create a new predicate
@@ -125,6 +138,7 @@ Relation Interpreter::evaluateQuery(Predicate p) {
     Relation r;
     string s = "";
     string name = "";
+    toProject.clear();
     for (int i = 0; i < p.vector_size(); i++) {
         s = p.getToken(i).getTokenString();
         ss << s; //get the query stuff
@@ -156,15 +170,6 @@ Relation Interpreter::evaluateQuery(Predicate p) {
         }
         s = ""; //reset s  
     }
-    return r;
-}
-
-void Interpreter::decoupleQueries() {
-    mapping.reserve(1000); //initialize this to something huge so it doesn't resize and jumble everything up
-    Relation r;
-    for (Predicate p: my_queries) { //will perform this on every fact in my_facts
-        r = evaluateQuery(p);
-               
         //yes/no
         int size = r.getSetSize();
         if (size > 0) {
@@ -192,19 +197,35 @@ void Interpreter::decoupleQueries() {
         mapping.clear(); //clear the map of this query
         cnt = 0; //reset cnt
 
-        //output all the things
-        ss << r.toString();
+    return r;
+}
+
+void Interpreter::decoupleQueries() {
+    Relation r;
+    for (Predicate p: my_queries) { //will perform this on every fact in my_facts
+        r = evaluateQuery(p);
+        ss << r.toString(); //output all the things
     }
 }
 
 
+void Interpreter::evaluateRules() {
+    vector<Predicate> rule_preds;
+    rule_preds.reserve(100);
+    for (Rule rule : my_rules) {
+        rule_preds = rule.getPreds();
+        evaluateRule(rule_preds);
+        rule_preds.clear();
+    }
+}
+
 //treat each body predicate as a query before you join them. bc if you have a constant in the predicate
 // in will shrink your relation significantly and speed up your joins so you finish in time
-void Interpreter::evaluateRule() {
+void Interpreter::evaluateRule(vector<Predicate> preds) {
     int i = 0;
     Relation result;
     Predicate head_pred;
-    for (Predicate p : rule_preds) {
+    for (Predicate p : preds) { //rule_preds is a data member of type vector<Predicate> assigned in evaluateRules()
         //check for the head predicate and hold it until the end
         if (p.getType() == head) head_pred = p; //not sure if this will actually work or if manual copy needed
         else if (i == 0) {
@@ -216,16 +237,76 @@ void Interpreter::evaluateRule() {
             i++; //inc here to ignore head predicate case
         }
     }
-        // findProjectCols() //gets the columns to project from headPredicate
-        // result = result.project()
-        // result = result.rename();
+        //just fyi there is stuff in evaluateQuery that gets cleared in decoupleQueries
+        //but if we don't call that function then they aren't getting cleared
+        findProjectCols(head_pred, result); //gets the columns to project from headPredicate
+        result = result.project(toProject);
+        result.setName(new_name); //set it to the new name of the rule
+        //result = result.rename();
         // result = dB[headPredicate.name()].unionize(result);
 }
 
-void Interpreter::evaluateRules() {
-    for (Rule rule : my_rules) {
-        rule_preds = rule.getPreds();
-        evaluateRule();
-        rule_preds.clear();
+//test version
+Relation Interpreter::evaluateRule(vector<Predicate> preds, Relation result) {
+    int i = 0;
+    Predicate head_pred;
+    for (Predicate p : preds) { //rule_preds is a data member of type vector<Predicate> assigned in evaluateRules()
+        //check for the head predicate and hold it until the end
+        cout << "looking at a predicate\n";
+        if (p.getType() == head) head_pred = p; //not sure if this will actually work or if manual copy needed
+        else if (i == 0) {
+            result = evaluateQuery(p);
+            cout << "just evaluated the first\n";
+            cout << result.toString();
+            i++; //inc here to ignore head predicate case
+        }
+        else {
+            Relation r = evaluateQuery(p);
+            cout << "just evaluated the next predicate\n" << r.toString();
+            result = result.naturalJoin(r); //evaluates and joins it to your result
+            cout << "just joined the things\n";
+            cout << result.toString();
+            i++; //inc here to ignore head predicate case
+        }
+    }
+        //just fyi there is stuff in evaluateQuery that gets cleared in decoupleQueries
+        //but if we don't call that function then they aren't getting cleared
+        findProjectCols(head_pred, result); //gets the columns to project from headPredicate
+        result = result.project(toProject);
+        result.setName(new_name); //set it to the new name of the rule
+        //result = result.rename();
+        // result = dB[headPredicate.name()].unionize(result);
+        return result;
+}
+
+//for rules they will all be variables so don't need to worry about constants
+//need to be able to 
+// 1) find the columns to project
+// find the head_pred tokens that match the r's headers and take those columns
+// 2) flip columns
+// if the positions are different then mark them to be flipped
+//MAYBE I don't actually have to do this b/c it should add them in the order it received them
+//which would be the correct order. We will see
+// 3) get the new name for rename while we are here
+void Interpreter::findProjectCols(Predicate head_pred, Relation r) { //takes in head_predicate
+    string s = "";
+    Tuple t = r.getHeader();
+    int h_pos = 0;
+    toProject.clear();
+    for (int i = 0; i < head_pred.vector_size(); i++) {
+        s = head_pred.getToken(i).getTokenString();
+        if (i == 0) new_name = s; //the new name will always be the first token. new_name is global
+        else {
+            for (string hs : t) {
+                if (s == hs) {
+                    //we have pos in head_pred (i-1) and pos in header (h_pos)
+                    toProject.push_back(h_pos); //add it in
+                }
+                h_pos++;
+            }
+            //reset stuff
+            h_pos = 0;
+            s = "";
+        }
     }
 }
