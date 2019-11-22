@@ -4,6 +4,7 @@ Relation r;
 unordered_map<string, int> mapping;
 unordered_map<string, int>::iterator it;
 vector<int> toProject;
+vector<Predicate> rule_preds;
 int cnt = 0; //keeps track of important tokens in queries ie names, vars and consts
 
 //part A
@@ -14,6 +15,7 @@ Interpreter::Interpreter(DatalogProgram my_data_p)
     my_facts = my_dp.getFacts();
     my_queries = my_dp.getQueries();
     my_rules = my_dp.getRules();
+    rule_preds.reserve(100);
     makeRelations();
     makeTuples();
     //evaluating rules
@@ -196,9 +198,12 @@ void Interpreter::decoupleQueries() {
 void Interpreter::evaluateRule() {
     int i = 0;
         Relation result;
-        for (Rule p : my_rules) {
+        for (Predicate p : rule_preds) {
             //treat each body predicate as a query before you join them. bc if you have a constant in the predicate
             // in will shrink your relation significantly and speed up your joins so you finish in time
+            
+            //check for the head predicate and hold it until the end
+
             if (i == 0) {
                 result = evaluateQuery(p);
             }
@@ -215,6 +220,8 @@ void Interpreter::evaluateRule() {
 
 void Interpreter::evaluateRules() {
     for (Rule rule : my_rules) {
-        
+        rule_preds = rule.getPreds();
+        evaluateRule();
+        rule_preds.clear();
     }
 }

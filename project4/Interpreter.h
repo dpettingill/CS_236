@@ -25,7 +25,6 @@ public:
     void joinTestCases();
     void makeTuples();
     void makeRelations();
-    void evaluateQuery(vector<string> query);
     void decoupleQueries();
     void evaluateQuery(Predicate p);
     void evaluateRule();
