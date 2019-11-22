@@ -24,3 +24,7 @@ std::string Rule::toString() {
     }
     return rule_strm.str();
 }
+
+vector<Predicate> Rule::getPreds() {
+    return my_rule_of_preds;
+}

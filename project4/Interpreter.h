@@ -16,22 +16,20 @@ private:
     vector<Predicate> my_schemes;
     vector<Predicate> my_queries; //use this for final output
     vector<vector<string>> queries; //use this for evaluating not the final output 
+    vector<Rule> my_rules;
     stringstream ss; //for printing out the final output
 public:
     Interpreter(DatalogProgram my_data_p);
     ~Interpreter();
     void testCases();
+    void joinTestCases();
     void makeTuples();
     void makeRelations();
     void evaluateQuery(vector<string> query);
     void decoupleQueries();
     void evaluateQuery(Predicate p);
-    void naturalJoin(Relation r1, Relation r2);
-    void findMatchingCols(Relation r1, Relation r2);
-    bool isJoinable(Tuple t1, Tuple t2);
-    Tuple combineTuples(Tuple t1, Tuple t2);
-
-
+    void evaluateRule();
+    void evaluateRules();
 };
 
 

@@ -34,6 +34,11 @@ public:
     void setHeader(Tuple t);
     void setName(string name);
     set<Tuple> getSet();
+    Relation naturalJoin(Relation r2);
+    void findMatchingCols(Relation r2);
+    bool isJoinable(Tuple t1, Tuple t2);
+    Tuple combineTuples(Tuple t1, Tuple t2);
+    Tuple combTupCartesian(Tuple t1, Tuple t2);
 };
 
 

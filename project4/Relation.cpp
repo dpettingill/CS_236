@@ -1,17 +1,16 @@
 #include "Relation.h"
-
-// Relation::Relation(string name, Tuple header)
-// {
-//     my_name = name;
-//     my_header = header;
-// }
-
-Relation::Relation() {}
+vector <pair<int, int> > matchingCols;
+vector <int> uniqueCols;
+bool iai_match_cols;
 
 
-Relation::~Relation()
-{
+Relation::Relation() {
+    matchingCols.reserve(100);
+    uniqueCols.reserve(100);
 }
+
+
+Relation::~Relation(){}
 
 
     string Relation::toString(){
@@ -117,3 +116,116 @@ Relation::~Relation()
     set<Tuple> Relation::getSet() {
         return my_set;
     }
+
+    // implement natural join - (the major portion of this lab)
+//     - join is always possible.
+//         - if none of the headers match then we just do a cartesian product
+//     - matchingColumns()
+//         - go through and find which headers match each other
+//         - keep track of these headers in some way (vector of pairs, two diff vectors of ints etc)
+//     - findUniqueColumns()
+//         - find the unique columns of the 2nd relation
+//         - once you have found all of your matching columns then all the rest of the columns must be unique
+//         - keep track with a vector of ints
+//     - combineColumns()
+//     - join (the fun part)
+//         for (tuple t1 : in R1)
+//             for (tuple t2 : in R2)
+//                 if (isJoinable(t1, t2, matchingColumns())) //isJoinable returns a boolean
+//                     //combineTuples /*adds in what you already have in the tuple
+//                     then add in the tuple information from your unique columns in R2*/
+//                     t3 = combineTuples(t, t2, uniqueCols)
+//                     resultRelation.add(t3);
+//         return resultRelation;
+//     isJoinable(t1, t2, vector matchingCols)
+//         for each match in matchingCols (vector of pairs of matching columns) {
+//            if (t1[matchingCols1] != t2[matchingCols2])
+//                 return false;
+//         }
+//         return true; //if it looped through all of the matching columns and didn't break out returning false then return true
+Relation Relation::naturalJoin(Relation r2) {
+    Relation result;
+    iai_match_cols = false; //if no matching columns exist
+    findMatchingCols(r2); //fills up matchingCols and uniqueCols vectors
+    //adjust the header and name of result here
+    Tuple h_result = combineTuples(my_header, r2.getHeader()); //combine headers
+    result.setHeader(h_result); //add them to result
+    result.setName("result"); //set the name 
+    set<Tuple> set1 = my_set;
+    set<Tuple> set2 = r2.getSet();
+    for (Tuple t1 : set1) {
+        for (Tuple t2 : set2) {
+            if (iai_match_cols) { //if we found at least one match
+                if (isJoinable(t1, t2)) {
+                    Tuple t3 = combineTuples(t1, t2);
+                    result.addTuple(t3);
+                }
+            }
+            else { //perform the cartesian product
+                Tuple t3 = combTupCartesian(t1, t2); //peforms cartesian product
+                result.addTuple(t3);
+            }
+        }
+    }
+    matchingCols.clear();
+    uniqueCols.clear();
+    return result;
+
+}
+
+void Relation::findMatchingCols(Relation r2) {
+    Tuple t1 = my_header;
+    Tuple t2 = r2.getHeader();
+    int i = 0;
+    int j = 0;
+    bool matched = false;
+    for (string s2 : t2) {
+        for (string s1 : t1) {
+            if (s1 == s2) {
+                matchingCols.push_back(make_pair(i,j));
+                matched = true;
+                iai_match_cols = true; //if we find a match set this to true
+            }
+            i++;
+        }
+        if (!matched) uniqueCols.push_back(j); //if the 2nd relation header at j is unique, push it on
+        matched = false;
+        i = 0;
+        j++;
+    }
+}
+
+
+//checks all of the matches to see if they have the same information for these tuples
+//if they are then we can combine them
+bool Relation::isJoinable(Tuple t1, Tuple t2) {
+    for (pair<int,int> p : matchingCols) {
+        if (t1[p.first] != t2[p.second]) {
+            return false;
+        }
+    }
+    return true;
+    
+}
+
+Tuple Relation::combineTuples(Tuple t1, Tuple t2) {
+    int i = 0;
+    int size = uniqueCols.size(); //grab every element in t2 that is unique
+    while (i < size) {
+        t1.push_back(t2.at(uniqueCols.at(i)));
+        i++;
+    }
+    return t1; //this is t3
+}
+
+
+Tuple Relation::combTupCartesian(Tuple t1, Tuple t2) {
+    int i = 0;
+    int size = t2.size(); //grab every element in t2
+    while (i < size) {
+        t1.push_back(t2.at(i));
+        i++;
+    }
+    return t1; //this is t3
+}
+

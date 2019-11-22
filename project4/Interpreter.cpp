@@ -4,10 +4,7 @@ Relation r;
 unordered_map<string, int> mapping;
 unordered_map<string, int>::iterator it;
 vector<int> toProject;
-vector <pair<int, int> > matchingCols;
-vector <int> uniqueCols;
 int cnt = 0; //keeps track of important tokens in queries ie names, vars and consts
-bool iai_match_cols;
 
 //part A
 Interpreter::Interpreter(DatalogProgram my_data_p)
@@ -16,12 +13,14 @@ Interpreter::Interpreter(DatalogProgram my_data_p)
     my_schemes = my_dp.getSchemes();
     my_facts = my_dp.getFacts();
     my_queries = my_dp.getQueries();
-    matchingCols.reserve(100);
-    uniqueCols.reserve(100);
+    my_rules = my_dp.getRules();
     makeRelations();
     makeTuples();
-    decoupleQueries();
-    cout << ss.str();
+    //evaluating rules
+    joinTestCases();
+    //evaluating queries
+    // decoupleQueries();
+    // cout << ss.str();
 }
 
 void Interpreter::testCases() {
@@ -44,6 +43,28 @@ void Interpreter::testCases() {
     vector<int> vect1{1};
     Relation r5 = r.project(vect1);
     cout << r5.toString();
+}
+
+void Interpreter::joinTestCases() {
+    cout << "testing join:\n";
+    Relation r1 = my_database.getRelation("snap");
+    cout << r1.toString();
+    cout << endl;
+    Relation r2 = my_database.getRelation("csg");
+    cout << r2.toString() << endl;
+    Relation result = r1.naturalJoin(r2);
+    cout << result.toString() << endl;
+
+    Relation r3 = my_database.getRelation("sl");
+    cout << r3.toString() << endl;
+    Relation r4 = my_database.getRelation("ncg");
+    cout << r4.toString() << endl;
+    Relation result2 = r3.naturalJoin(r4);
+    cout << result2.toString() << endl;
+
+    cout << "testing join where headers match but no tuple info:\n";
+    Relation result3 = r1.naturalJoin(r3);
+    cout << result3.toString() << endl;
 }
 
 // Predicate my_p(tok_vec, length, my_type);//create a new predicate
@@ -92,6 +113,7 @@ void Interpreter::makeRelations() {
         my_rel.setHeader(header);
         my_rel.setName(name);
         my_database.addRelation(name, my_rel);
+        header.clear();
     }
 }
 
@@ -170,96 +192,29 @@ void Interpreter::decoupleQueries() {
     }
 }
 
-// implement natural join - (the major portion of this lab)
-//     - join is always possible.
-//         - if none of the headers match then we just do a cartesian product
-//     - matchingColumns()
-//         - go through and find which headers match each other
-//         - keep track of these headers in some way (vector of pairs, two diff vectors of ints etc)
-//     - findUniqueColumns()
-//         - find the unique columns of the 2nd relation
-//         - once you have found all of your matching columns then all the rest of the columns must be unique
-//         - keep track with a vector of ints
-//     - combineColumns()
-//     - join (the fun part)
-//         for (tuple t1 : in R1)
-//             for (tuple t2 : in R2)
-//                 if (isJoinable(t1, t2, matchingColumns())) //isJoinable returns a boolean
-//                     //combineTuples /*adds in what you already have in the tuple
-//                     then add in the tuple information from your unique columns in R2*/
-//                     t3 = combineTuples(t, t2, uniqueCols)
-//                     resultRelation.add(t3);
-//         return resultRelation;
-//     isJoinable(t1, t2, vector matchingCols)
-//         for each match in matchingCols (vector of pairs of matching columns) {
-//            if (t1[matchingCols1] != t2[matchingCols2])
-//                 return false;
-//         }
-//         return true; //if it looped through all of the matching columns and didn't break out returning false then return true
-void Interpreter::naturalJoin(Relation r1, Relation r2) {
-    Relation result;
-    iai_match_cols = false; //if no matching columns exist
-    findMatchingCols(r1, r2); //fills up matchingCols and uniqueCols vectors
-    //adjust the header and name of result here
-    if (iai_match_cols) { //if we found at least one match
-        set<Tuple> set1 = r1.getSet();
-        set<Tuple> set2 = r2.getSet();
-        for (Tuple t1 : set1) {
-            for (Tuple t2 : set2) {
-                if (isJoinable(t1, t2)) {
-                    Tuple t3 = combineTuples(t1, t2);
-                    result.addTuple(t3);
-                }
-            }
-        }
-    }
-    else { //perform the cartesian product
 
-    }
-
-}
-
-void Interpreter::findMatchingCols(Relation r1, Relation r2) {
-    Tuple t1 = r1.getHeader();
-    Tuple t2 = r2.getHeader();
+void Interpreter::evaluateRule() {
     int i = 0;
-    int j = 0;
-    bool matched = false;
-    for (string s2 : t2) {
-        for (string s1 : t1) {
-            if (s1 == s2) {
-                matchingCols.push_back(make_pair(i,j));
-                matched = true;
-                iai_match_cols = true; //if we find a match set this to true
+        Relation result;
+        for (Rule p : my_rules) {
+            //treat each body predicate as a query before you join them. bc if you have a constant in the predicate
+            // in will shrink your relation significantly and speed up your joins so you finish in time
+            if (i == 0) {
+                result = evaluateQuery(p);
+            }
+            else {
+                result = result.naturalJoin(evaluateQuery(p)); //evaluates and joins it to your result
             }
             i++;
         }
-        if (!matched) uniqueCols.push_back(j); //if the 2nd relation header at j is unique, push it on
-        matched = false;
-        i = 0;
-        j++;
-    }
+        // findProjectCols() //gets the columns to project from headPredicate
+        // result = result.project()
+        // result = result.rename();
+        // result = dB[headPredicate.name()].unionize(result);
 }
 
-
-//checks all of the matches to see if they have the same information for these tuples
-//if they are then we can combine them
-bool Interpreter::isJoinable(Tuple t1, Tuple t2) {
-    for (pair<int,int> p : matchingCols) {
-        if (t1[p.first] != t2[p.second]) {
-            return false;
-        }
+void Interpreter::evaluateRules() {
+    for (Rule rule : my_rules) {
+        
     }
-    return true;
-    
-}
-
-Tuple Interpreter::combineTuples(Tuple t1, Tuple t2) {
-    int i = 0;
-    int size = t2.size();
-    while (i < size) {
-        t1.push_back(t2.at(uniqueCols.at(i)));
-        i++;
-    }
-    return t1; //this is t3
 }
