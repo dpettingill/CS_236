@@ -1,5 +1,7 @@
 #include "Predicate.h"
 
+Predicate::Predicate() {}
+
 Predicate::Predicate(vector<Token> toks, int l, predType t)
 {
     pred_tokens = toks;

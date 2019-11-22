@@ -1,6 +1,6 @@
 #include "Interpreter.h"
 //globals
-Relation r;
+// Relation r;
 unordered_map<string, int> mapping;
 unordered_map<string, int>::iterator it;
 vector<int> toProject;
@@ -19,10 +19,10 @@ Interpreter::Interpreter(DatalogProgram my_data_p)
     makeRelations();
     makeTuples();
     //evaluating rules
-    joinTestCases();
+    // joinTestCases();
     //evaluating queries
-    // decoupleQueries();
-    // cout << ss.str();
+    decoupleQueries();
+    cout << ss.str();
 }
 
 void Interpreter::testCases() {
@@ -121,7 +121,8 @@ void Interpreter::makeRelations() {
 
 
 //part B
-void Interpreter::evaluateQuery(Predicate p) {
+Relation Interpreter::evaluateQuery(Predicate p) {
+    Relation r;
     string s = "";
     string name = "";
     for (int i = 0; i < p.vector_size(); i++) {
@@ -155,12 +156,14 @@ void Interpreter::evaluateQuery(Predicate p) {
         }
         s = ""; //reset s  
     }
+    return r;
 }
 
 void Interpreter::decoupleQueries() {
     mapping.reserve(1000); //initialize this to something huge so it doesn't resize and jumble everything up
+    Relation r;
     for (Predicate p: my_queries) { //will perform this on every fact in my_facts
-          evaluateQuery(p);
+        r = evaluateQuery(p);
                
         //yes/no
         int size = r.getSetSize();
@@ -195,23 +198,24 @@ void Interpreter::decoupleQueries() {
 }
 
 
+//treat each body predicate as a query before you join them. bc if you have a constant in the predicate
+// in will shrink your relation significantly and speed up your joins so you finish in time
 void Interpreter::evaluateRule() {
     int i = 0;
-        Relation result;
-        for (Predicate p : rule_preds) {
-            //treat each body predicate as a query before you join them. bc if you have a constant in the predicate
-            // in will shrink your relation significantly and speed up your joins so you finish in time
-            
-            //check for the head predicate and hold it until the end
-
-            if (i == 0) {
-                result = evaluateQuery(p);
-            }
-            else {
-                result = result.naturalJoin(evaluateQuery(p)); //evaluates and joins it to your result
-            }
-            i++;
+    Relation result;
+    Predicate head_pred;
+    for (Predicate p : rule_preds) {
+        //check for the head predicate and hold it until the end
+        if (p.getType() == head) head_pred = p; //not sure if this will actually work or if manual copy needed
+        else if (i == 0) {
+            result = evaluateQuery(p);
+            i++; //inc here to ignore head predicate case
         }
+        else {
+            result = result.naturalJoin(evaluateQuery(p)); //evaluates and joins it to your result
+            i++; //inc here to ignore head predicate case
+        }
+    }
         // findProjectCols() //gets the columns to project from headPredicate
         // result = result.project()
         // result = result.rename();

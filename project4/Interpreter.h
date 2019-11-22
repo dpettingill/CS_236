@@ -26,7 +26,7 @@ public:
     void makeTuples();
     void makeRelations();
     void decoupleQueries();
-    void evaluateQuery(Predicate p);
+    Relation evaluateQuery(Predicate p);
     void evaluateRule();
     void evaluateRules();
 };

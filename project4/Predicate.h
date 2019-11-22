@@ -17,6 +17,7 @@ private:
 
 
 public:
+    Predicate();
     Predicate(vector<Token> toks, int l, predType t);
     ~Predicate();
     std::string toString(); //maybe make this a string
