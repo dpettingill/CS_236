@@ -39,6 +39,7 @@ public:
     bool isJoinable(Tuple t1, Tuple t2);
     Tuple combineTuples(Tuple t1, Tuple t2);
     Tuple combTupCartesian(Tuple t1, Tuple t2);
+    Relation unionize(Relation toUnion);
 };
 
 

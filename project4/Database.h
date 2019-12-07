@@ -19,6 +19,8 @@ public:
     string toString();
     Relation getRelation(string name);
     void eraseRelation(string name);
+    int findPreCount();
+    int findPostCount();
 };
 
 

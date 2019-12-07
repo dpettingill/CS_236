@@ -12,6 +12,7 @@ public:
     void addPredicate(Predicate my_p);
     std::string toString();
     vector<Predicate> getPreds();
+    Predicate getHeadPred();
 };
 
 

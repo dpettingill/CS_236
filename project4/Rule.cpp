@@ -19,12 +19,16 @@ std::string Rule::toString() {
         if (my_rule_of_preds.at(i).getType() == head) {
             rule_strm << my_rule_of_preds.at(i).toString() << " :- ";
         }
-        else if (i != (j-1)) rule_strm << my_rule_of_preds.at(i).toString() << ", ";
-        else rule_strm << my_rule_of_preds.at(i).toString() << endl;
+        else if (i != (j-1)) rule_strm << my_rule_of_preds.at(i).toString() << ",";
+        else rule_strm << my_rule_of_preds.at(i).toString() << "." << endl;
     }
     return rule_strm.str();
 }
 
 vector<Predicate> Rule::getPreds() {
     return my_rule_of_preds;
+}
+
+Predicate Rule::getHeadPred() {
+    return my_rule_of_preds.at(0);
 }

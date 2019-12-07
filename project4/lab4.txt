@@ -46,7 +46,7 @@
         result = dB[headPredicate.name()].unionize(result);
     }
     
-3. Unionize - (this is easy like 10 lines of code)
+3. Unionize - (this is easy like 10 lines of code) //this goes in relation class
 unionize(Relation result) {
     for(tuple t: result) {
         if (tupleSet.insert(t).second) //this does the insert and then tells you if it inserted
@@ -61,9 +61,9 @@ unionize(Relation result) {
     - first we need to calculate the number of tuples in our database upfront - call it precount
         - just loop through your map and add up the sum of all the tuples
     do {
-    findPreCount();
+    findPreCount(); //these are defined in database
     - for (Rule r : my_rules) {
         evalutateOneRule(r);
     }
-    findPostCount();
+    findPostCount(); //loop through all the relations in database and count each tuple
     } while(pre_count != post_count)

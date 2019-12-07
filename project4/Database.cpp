@@ -35,3 +35,32 @@ Relation Database::getRelation(string name) {
 void Database::eraseRelation(string name) {
     my_map.erase(name);
 }
+
+int Database::findPreCount() {
+    int count = 0;
+    map<string, Relation>::iterator it = my_map.begin();
+    while (it != my_map.end()) {
+        Relation r = it->second;
+        set<Tuple> rSet = r.getSet();
+        for (Tuple t : rSet) {
+            count++;
+        }
+        it++;
+    }
+    return count;
+}
+
+int Database::findPostCount() {
+    int count = 0;
+    map<string, Relation>::iterator it = my_map.begin();
+    while (it != my_map.end()) {
+        Relation r = it->second;
+        set<Tuple> rSet = r.getSet();
+        for (Tuple t : rSet) {
+            count++;
+        }
+        it++;
+    }
+    return count;
+}
+

@@ -5,6 +5,7 @@
 #include "Tuple.h"
 #include <stdio.h>
 #include <unordered_map>
+#include "../project5/graph.h"
 using namespace std;
 
 class Interpreter
@@ -27,7 +28,7 @@ public:
     void makeTuples();
     void makeRelations();
     void decoupleQueries();
-    Relation evaluateQuery(Predicate p);
+    Relation evaluateQuery(Predicate p, bool rule_eval);
     void evaluateRule(vector<Predicate> preds);
     Relation evaluateRule(vector<Predicate> preds, Relation r); //test version
     void evaluateRules();

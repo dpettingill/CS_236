@@ -18,10 +18,12 @@ Interpreter::Interpreter(DatalogProgram my_data_p)
     makeRelations();
     makeTuples();
     mapping.reserve(1000); //initialize this to something huge so it doesn't resize and jumble everything up
+    graph my_graph(my_rules);
     //evaluating rules
     // joinTestCases();
-    evalRuleTestCases();
+    // evalRuleTestCases();
     //evaluating queries
+    // evaluateRules();
     // decoupleQueries();
     // cout << ss.str();
 }
@@ -134,14 +136,15 @@ void Interpreter::makeRelations() {
 
 
 //part B
-Relation Interpreter::evaluateQuery(Predicate p) {
+Relation Interpreter::evaluateQuery(Predicate p, bool rule_eval) {
+    stringstream my_ss;
     Relation r;
     string s = "";
     string name = "";
     toProject.clear();
     for (int i = 0; i < p.vector_size(); i++) {
         s = p.getToken(i).getTokenString();
-        ss << s; //get the query stuff
+        my_ss << s; //get the query stuff
         //select based on the query
         if (i == 0) {
             name = p.getToken(i).getTokenString(); //name is query.at(0)
@@ -173,10 +176,10 @@ Relation Interpreter::evaluateQuery(Predicate p) {
         //yes/no
         int size = r.getSetSize();
         if (size > 0) {
-            ss << " Yes(" <<  size << ")\n";
+            my_ss << " Yes(" <<  size << ")\n";
         }
         else {
-            ss << " No\n";
+            my_ss << " No\n";
         }
 
         //project
@@ -196,27 +199,39 @@ Relation Interpreter::evaluateQuery(Predicate p) {
         r = r.rename(t); //rename r
         mapping.clear(); //clear the map of this query
         cnt = 0; //reset cnt
-
+        if (!rule_eval) ss << my_ss.str();
     return r;
 }
 
 void Interpreter::decoupleQueries() {
     Relation r;
+    ss << "Query Evaluation\n";
     for (Predicate p: my_queries) { //will perform this on every fact in my_facts
-        r = evaluateQuery(p);
+        r = evaluateQuery(p, false);
         ss << r.toString(); //output all the things
     }
 }
 
 
 void Interpreter::evaluateRules() {
+    int preCount = 0;
+    int postCount = 0;
+    int i = 0;
     vector<Predicate> rule_preds;
     rule_preds.reserve(100);
-    for (Rule rule : my_rules) {
-        rule_preds = rule.getPreds();
-        evaluateRule(rule_preds);
-        rule_preds.clear();
-    }
+    cout << "Rule Evaluation\n";
+    do {
+        preCount = my_database.findPreCount();
+        for (Rule rule : my_rules) {
+            cout << rule.toString();
+            rule_preds = rule.getPreds();
+            evaluateRule(rule_preds);
+            rule_preds.clear();
+        }
+        postCount = my_database.findPostCount();
+        i++;
+    } while (preCount != postCount);
+    cout << "\nSchemes populated after " << i << " passes through the Rules.\n\n";
 }
 
 //treat each body predicate as a query before you join them. bc if you have a constant in the predicate
@@ -229,11 +244,11 @@ void Interpreter::evaluateRule(vector<Predicate> preds) {
         //check for the head predicate and hold it until the end
         if (p.getType() == head) head_pred = p; //not sure if this will actually work or if manual copy needed
         else if (i == 0) {
-            result = evaluateQuery(p);
+            result = evaluateQuery(p, true);
             i++; //inc here to ignore head predicate case
         }
         else {
-            result = result.naturalJoin(evaluateQuery(p)); //evaluates and joins it to your result
+            result = result.naturalJoin(evaluateQuery(p, true)); //evaluates and joins it to your result
             i++; //inc here to ignore head predicate case
         }
     }
@@ -242,8 +257,9 @@ void Interpreter::evaluateRule(vector<Predicate> preds) {
         findProjectCols(head_pred, result); //gets the columns to project from headPredicate
         result = result.project(toProject);
         result.setName(new_name); //set it to the new name of the rule
-        //result = result.rename();
-        // result = dB[headPredicate.name()].unionize(result);
+        result = my_database.getRelation(new_name).unionize(result);
+        my_database.eraseRelation(new_name);
+        my_database.addRelation(new_name, result);
 }
 
 //test version
@@ -255,13 +271,13 @@ Relation Interpreter::evaluateRule(vector<Predicate> preds, Relation result) {
         cout << "looking at a predicate\n";
         if (p.getType() == head) head_pred = p; //not sure if this will actually work or if manual copy needed
         else if (i == 0) {
-            result = evaluateQuery(p);
+            result = evaluateQuery(p, true);
             cout << "just evaluated the first\n";
             cout << result.toString();
             i++; //inc here to ignore head predicate case
         }
         else {
-            Relation r = evaluateQuery(p);
+            Relation r = evaluateQuery(p, true);
             cout << "just evaluated the next predicate\n" << r.toString();
             result = result.naturalJoin(r); //evaluates and joins it to your result
             cout << "just joined the things\n";
@@ -283,10 +299,6 @@ Relation Interpreter::evaluateRule(vector<Predicate> preds, Relation result) {
 //need to be able to 
 // 1) find the columns to project
 // find the head_pred tokens that match the r's headers and take those columns
-// 2) flip columns
-// if the positions are different then mark them to be flipped
-//MAYBE I don't actually have to do this b/c it should add them in the order it received them
-//which would be the correct order. We will see
 // 3) get the new name for rename while we are here
 void Interpreter::findProjectCols(Predicate head_pred, Relation r) { //takes in head_predicate
     string s = "";
@@ -310,3 +322,5 @@ void Interpreter::findProjectCols(Predicate head_pred, Relation r) { //takes in 
         }
     }
 }
+
+
