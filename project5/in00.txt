@@ -1,0 +1,19 @@
+
+
+Schemes:
+Alpha(x,y,z)
+Bravo(a,b,z)
+Charlie(x,y,c)
+Delta(x,y,z)
+Echo(y,z,x)
+
+Facts:
+
+Rules:
+Alpha(x,y,z) :- Bravo(a,b,z), Charlie(x,y,c).
+Bravo(x,y,z) :- Charlie(a,x,z), Alpha(y,a,b).
+Charlie(x,y,z) :- Delta(z,y,x).
+Delta(x,y,z) :- Charlie(z,x,y).
+Delta(x,y,z) :- Echo(y,z,x).
+
+Queries:

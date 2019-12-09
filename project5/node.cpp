@@ -40,11 +40,30 @@ bool node::isVisited() {
     return visited;
 }
 
-void node::descend(int i) {
-    if (i == 0) set<int>::iterator it = friend_nodes.begin();
-    else if (i == 1) set<int>::iterator it = rev_friend_nodes.begin();
-    else cout << "something is wrong\n";
-    for (int id : rev_friend_nodes) {
+set<int> node::getFriendNodes() {
+    return friend_nodes;
+}
 
-    }
+set<int> node::getFriendNodes_rev() {
+    return rev_friend_nodes;
+}
+
+void node::markVisited() {
+    visited = true;
+}
+
+void node::markNotVisited() {
+    visited = false;
+}
+
+void node::setPostOrder(int po) {
+    post_order = po;
+}
+
+int node::getId() {
+    return node_id;
+}
+
+int node::getPostOrder() {
+    return post_order;
 }

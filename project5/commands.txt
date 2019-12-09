@@ -1,0 +1,7 @@
+git add .
+git commit -m "comment"
+git push origin master
+
+g++ -Wall -Werror -std=c++17 -g *.cpp -o lab5
+./lab5 in50.txt > actual.txt
+compare-object (get-content actual.txt) (get-content out55.txt)

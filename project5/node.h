@@ -12,6 +12,7 @@ private:
     bool visited;
     int node_id;
     Rule my_rule;
+    int post_order;
 public:
     node(Rule rule, int id);
     ~node();
@@ -20,5 +21,12 @@ public:
     string depend_toString();
     string revDepend_toString();
     bool isVisited();
-    void descend(int i);
+    void markVisited();
+    void markNotVisited();
+    set<int> getFriendNodes();
+    set<int> getFriendNodes_rev();
+    void setPostOrder(int po);
+    int getId();
+    int getPostOrder();
 };
+
