@@ -18,14 +18,23 @@ Interpreter::Interpreter(DatalogProgram my_data_p)
     makeRelations();
     makeTuples();
     mapping.reserve(1000); //initialize this to something huge so it doesn't resize and jumble everything up
-    graph my_graph(my_rules);
-    //evaluating rules
+    project5();
+}
+
+void Interpreter::project4() {
+    // evaluating rules
     // joinTestCases();
     // evalRuleTestCases();
     //evaluating queries
-    // evaluateRules();
-    // decoupleQueries();
-    // cout << ss.str();
+    evaluateRules();
+    decoupleQueries();
+    cout << ss.str();
+}
+
+void Interpreter::project5() {
+    evalRulesGraph();
+    decoupleQueries();
+    cout << ss.str();
 }
 
 void Interpreter::testCases() {
@@ -261,6 +270,79 @@ void Interpreter::evaluateRule(vector<Predicate> preds) {
         my_database.eraseRelation(new_name);
         my_database.addRelation(new_name, result);
 }
+
+void Interpreter::evalRulesGraph() {
+    graph my_graph(my_rules);
+    int preCount = 0;
+    int postCount = 0;
+    int i = 0;
+    vector<Predicate> rule_preds;
+    rule_preds.reserve(100);
+    map<int,vector<node>> eval_sccs = my_graph.getEvalSccs();
+    map<int,vector<node>>::reverse_iterator it = eval_sccs.rbegin();
+    cout << "\nRule Evaluation\n";
+    while (it != eval_sccs.rend()) { //go through highest po to lowest
+        if (it->second.size() > 0) {
+            cout << "SCC: ";
+            output_sccs(it);
+            cout << endl;
+            // node ref = it->second.at(it->second.size()-1); //the node with highest po # for this scc is the last one added into the scc vector
+            // cout << ref.getId() << endl;
+            if((it->second.size() == 1) && (it->second.at(0).getFriendNodes().size() == 0)) {
+                Rule r = it->second.at(0).getRule();
+                cout << r.toString();
+                rule_preds = r.getPreds();
+                evaluateRule(rule_preds);
+                rule_preds.clear();
+                cout << "1 passes: R" << it->second.at(0).getId() << endl;
+            }
+            else  {
+                do {
+                    for (node n : it->second) {
+                        preCount = my_database.findPreCount();
+                        Rule r = n.getRule();
+                        cout << r.toString();
+                        rule_preds = r.getPreds();
+                        evaluateRule(rule_preds);
+                        rule_preds.clear();
+                        postCount = my_database.findPostCount();
+                    }
+                    i++;
+                } while (preCount != postCount);
+                cout << i << " passes: ";
+                output_sccs(it);
+            }
+        }
+        it++;
+    }
+    cout << endl;
+}
+
+void Interpreter::output_sccs(map<int, vector<node>>::reverse_iterator it) {
+    for (unsigned k = 0; k < it->second.size(); k++) {
+        if (k < it->second.size() - 1)
+        cout << "R" << it->second.at(k).getId() << ",";
+        else 
+        cout << "R" << it->second.at(k).getId();
+    }
+}
+
+
+//     for (node n : it->second) {
+            //         do {
+            //             preCount = my_database.findPreCount();
+            //             Rule r = n.getRule();
+            //             cout << r.toString();
+            //             rule_preds = r.getPreds();
+            //             evaluateRule(rule_preds);
+            //             rule_preds.clear();
+            //             postCount = my_database.findPostCount();
+            //             i++;
+            //         } while (preCount != postCount);
+            //         cout << i << " passes: R" << ref.getId() << endl;
+            //         i = 0;
+            //     }
+            // }
 
 //test version
 Relation Interpreter::evaluateRule(vector<Predicate> preds, Relation result) {

@@ -28,5 +28,6 @@ public:
     void setPostOrder(int po);
     int getId();
     int getPostOrder();
+    Rule getRule();
 };
 

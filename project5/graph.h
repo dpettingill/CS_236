@@ -11,10 +11,11 @@ private:
     map<int, node> node_graph;
     vector<Rule> my_rules;
     int post_order;
-    vector<vector<node>> my_sccs;
+    map<int, vector<node>> eval_sccs; //the post order (int) and the corresponding scc to evaluate
 public:
     graph(vector<Rule> rules);
     ~graph();
+    void debug();
     void assign_nodes();
     void create_dependencies();
     void print_dependencies();
@@ -26,5 +27,6 @@ public:
     void output_sccs();
     void output_pos();
     void clear_visits();
+    map<int,vector<node>> getEvalSccs();
 };
 

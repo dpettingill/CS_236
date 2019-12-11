@@ -67,3 +67,7 @@ int node::getId() {
 int node::getPostOrder() {
     return post_order;
 }
+
+Rule node::getRule() {
+    return my_rule;
+}

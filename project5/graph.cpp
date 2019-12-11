@@ -5,16 +5,22 @@ graph::graph(vector<Rule> rules) {
     assign_nodes();
     create_dependencies();
     print_dependencies();
+    dfs_rev();
+    output_sccs();
+    cout << endl;
+    // debug();
+}
+graph::~graph(){}
+
+void graph::debug() {
+    print_dependencies();
     cout << endl;
     print_revDependencies();
     cout << endl;
-    dfs();
-    dfs_rev();
     output_sccs();
     cout << endl;
     output_pos();
 }
-graph::~graph(){}
 
 void graph::assign_nodes() {
     for (unsigned i = 0; i < my_rules.size(); i++) {
@@ -114,7 +120,7 @@ void graph::dfs_rev() {
        if (tmp->isVisited()) {} //do nothing
        else {
            descend_rev(tmp, scc);
-           my_sccs.push_back(scc);
+           eval_sccs.insert(pair<int,vector<node>>(post_order,scc));
            scc.clear();
        }
        it++;
@@ -133,6 +139,8 @@ void graph::descend_rev(node* tmp, vector<node> &scc) {
         if (tmp2->isVisited()) {} //do nothing
         else descend_rev(tmp2, scc);
     }
+    tmp->setPostOrder(post_order);
+    post_order++;
     scc.push_back(*tmp);
     return;
 }
@@ -147,22 +155,21 @@ void graph::descend(node* tmp) {
         if (tmp2->isVisited()) {} //do nothing
         else descend(tmp2);
     }
-    tmp->setPostOrder(post_order);
-    post_order++;
     return;
 }
 
 void graph::output_sccs() {
-    cout << "SCCs\n";
-    for (unsigned i = 0; i < my_sccs.size(); i++) {
+    cout<< "SCCs\n";
+    map<int, vector<node>>::iterator it = eval_sccs.begin();
+    int i = 0;
+    while(it != eval_sccs.end()) {
         cout << "SCC:" << i << " ";
-        for (unsigned j = 0; j < my_sccs.at(i).size(); j++) {
-            if (j+1 == my_sccs.at(i).size())
-            cout << "R" << my_sccs.at(i).at(j).getId();
-            else 
-            cout << "R" << my_sccs.at(i).at(j).getId() << ",";
+        for (unsigned j = 0; j < it->second.size(); j++) {
+            cout << "R" << it->second.at(j).getId() << " "; 
         }
         cout << endl;
+        it++;
+        i++;
     }
 }
 
@@ -182,4 +189,8 @@ void graph::clear_visits() {
        it->second.markNotVisited();
        it++;
    }
+}
+
+map<int,vector<node>> graph::getEvalSccs() {
+    return eval_sccs;
 }

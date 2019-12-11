@@ -5,7 +5,7 @@
 #include "Tuple.h"
 #include <stdio.h>
 #include <unordered_map>
-#include "../project5/graph.h"
+#include "graph.h"
 using namespace std;
 
 class Interpreter
@@ -22,6 +22,8 @@ private:
 public:
     Interpreter(DatalogProgram my_data_p);
     ~Interpreter();
+    void project4();
+    void project5();
     void testCases();
     void joinTestCases();
     void evalRuleTestCases();
@@ -33,6 +35,8 @@ public:
     Relation evaluateRule(vector<Predicate> preds, Relation r); //test version
     void evaluateRules();
     void findProjectCols(Predicate p, Relation r);
+    void evalRulesGraph();
+    void output_sccs(map<int, vector<node>>::reverse_iterator it);
 };
 
 
