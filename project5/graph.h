@@ -22,6 +22,7 @@ public:
     void print_revDependencies();
     void dfs();
     void dfs_rev();
+    void organizeScc(vector<node> &my_scc);
     void descend_rev(node* tmp, vector<node> &scc);
     void descend(node* tmp);
     void output_sccs();

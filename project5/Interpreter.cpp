@@ -271,6 +271,13 @@ void Interpreter::evaluateRule(vector<Predicate> preds) {
         my_database.addRelation(new_name, result);
 }
 
+bool Interpreter::quickEvalCheck(map<int, vector<node>>::reverse_iterator it) {
+    for (int i : it->second.at(0).getFriendNodes()) {
+        if (it->second.at(0).getId() == i) return false;;
+    }
+    return true;
+}
+
 void Interpreter::evalRulesGraph() {
     graph my_graph(my_rules);
     int preCount = 0;
@@ -280,15 +287,15 @@ void Interpreter::evalRulesGraph() {
     rule_preds.reserve(100);
     map<int,vector<node>> eval_sccs = my_graph.getEvalSccs();
     map<int,vector<node>>::reverse_iterator it = eval_sccs.rbegin();
+
     cout << "\nRule Evaluation\n";
     while (it != eval_sccs.rend()) { //go through highest po to lowest
         if (it->second.size() > 0) {
             cout << "SCC: ";
             output_sccs(it);
             cout << endl;
-            // node ref = it->second.at(it->second.size()-1); //the node with highest po # for this scc is the last one added into the scc vector
-            // cout << ref.getId() << endl;
-            if((it->second.size() == 1) && (it->second.at(0).getFriendNodes().size() == 0)) {
+
+            if((it->second.size() == 1) && (quickEvalCheck(it))) {
                 Rule r = it->second.at(0).getRule();
                 cout << r.toString();
                 rule_preds = r.getPreds();
@@ -298,19 +305,21 @@ void Interpreter::evalRulesGraph() {
             }
             else  {
                 do {
+                    preCount = my_database.findPreCount();
                     for (node n : it->second) {
-                        preCount = my_database.findPreCount();
                         Rule r = n.getRule();
                         cout << r.toString();
                         rule_preds = r.getPreds();
                         evaluateRule(rule_preds);
                         rule_preds.clear();
-                        postCount = my_database.findPostCount();
                     }
+                    postCount = my_database.findPostCount();
                     i++;
                 } while (preCount != postCount);
                 cout << i << " passes: ";
+                i = 0;
                 output_sccs(it);
+                cout << endl;
             }
         }
         it++;
@@ -320,10 +329,10 @@ void Interpreter::evalRulesGraph() {
 
 void Interpreter::output_sccs(map<int, vector<node>>::reverse_iterator it) {
     for (unsigned k = 0; k < it->second.size(); k++) {
-        if (k < it->second.size() - 1)
-        cout << "R" << it->second.at(k).getId() << ",";
-        else 
-        cout << "R" << it->second.at(k).getId();
+            if (k < it->second.size() - 1)
+                cout << "R" << it->second.at(k).getId() << ",";
+            else 
+                cout << "R" << it->second.at(k).getId();
     }
 }
 

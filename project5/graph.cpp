@@ -6,15 +6,11 @@ graph::graph(vector<Rule> rules) {
     create_dependencies();
     print_dependencies();
     dfs_rev();
-    output_sccs();
-    cout << endl;
-    // debug();
+    debug();
 }
 graph::~graph(){}
 
 void graph::debug() {
-    print_dependencies();
-    cout << endl;
     print_revDependencies();
     cout << endl;
     output_sccs();
@@ -120,6 +116,7 @@ void graph::dfs_rev() {
        if (tmp->isVisited()) {} //do nothing
        else {
            descend_rev(tmp, scc);
+           organizeScc(scc);
            eval_sccs.insert(pair<int,vector<node>>(post_order,scc));
            scc.clear();
        }
@@ -127,6 +124,18 @@ void graph::dfs_rev() {
    }
    clear_visits(); //clear the visited var of the nodes
 }
+
+void graph::organizeScc(vector<node> &my_scc) {
+    for (unsigned i = 0; i < my_scc.size()-1; i++) {
+        for (unsigned j = 1; j < my_scc.size(); j++) {
+            if (my_scc.at(i).getId() > my_scc.at(j).getId()) { 
+                iter_swap(my_scc.begin() + i, my_scc.begin() + (j));
+            }
+        }
+    }
+}
+
+
 
 
 void graph::descend_rev(node* tmp, vector<node> &scc) {

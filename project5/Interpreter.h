@@ -37,6 +37,7 @@ public:
     void findProjectCols(Predicate p, Relation r);
     void evalRulesGraph();
     void output_sccs(map<int, vector<node>>::reverse_iterator it);
+    bool quickEvalCheck(map<int, vector<node>>::reverse_iterator it);
 };
 
 
