@@ -6,7 +6,8 @@ graph::graph(vector<Rule> rules) {
     create_dependencies();
     print_dependencies();
     dfs_rev();
-    debug();
+    dfs();
+    // debug();
 }
 graph::~graph(){}
 
@@ -68,61 +69,71 @@ void graph::print_revDependencies() {
     cout << ss.str();
 }
 
+//how do I want to accomplish the dfs()?
+//well I need to somehow while loop through the nodes from highest po to lowest
+//creating the sccs as I go
+//a good way to do that would be a map which would self-order
+
+
 void graph::dfs() {
-   map<int, node>::iterator it = node_graph.begin();
-   while (it != node_graph.end()) {
+    map<int, node>::reverse_iterator it = po_nodes.rbegin();
+    vector<node> scc;
+    while (it != po_nodes.rend()) {
        node* tmp = &it->second;
        if (tmp->isVisited()) {} //do nothing
        else {
-           descend(tmp);
+           descend(tmp, scc);
+           organizeScc(scc);
+           eval_sccs.insert(pair<int,vector<node>>(tmp->getPostOrder(),scc));
+           scc.clear();
        }
        it++;
    }
    clear_visits(); //clear the visited var of the nodes
 }
 
-/*
-    iterate through our graph
-    if (visited) //do nothing
-    else {
-        //seems like this should be a recursive function
-        //passes in a pointer to the node
-        descend() {
-            for (int id : rev_friend_nodes) {
-                node* tmp = graph.find(id)->second;
-                if (*tmp.isVisited()) //do nothing
-                else {
-                    &tmp.descend(tmp); //recursive funct
-                }
-            }
-            visited = true;
-        }
+void graph::descend(node* tmp, vector<node> &scc) {
+    set<int> my_nodes;
+    tmp->markVisited();
+    my_nodes = tmp->getFriendNodes();
+    for (int id : my_nodes) {
+        node tmp2 = node_graph.find(id)->second;
+        node* tmp3 = &po_nodes.find(tmp2.getPostOrder())->second;
+        if (tmp3->isVisited()) {} //do nothing
+        else descend(tmp3, scc);
     }
-    i++
-    */
+    scc.push_back(*tmp);
+    return;
+}
 
-   //how do I want to implement sccs? a vector<vector<node>>?
-   //what if I pass in a vector<node> into the descend function everytime I call it
-   //then as long as I keep descending it will add those nodes to that vector
-   //and when I exit in the dfs_rev func I can add that vector to my_sccs
-   //and I need to keep track of post-order numbers, how should I do that?
-   //do I make it a node data member?
-   //ok but when do I assign it? at the end of descend!
 void graph::dfs_rev() {
    map<int, node>::iterator it = node_graph.begin();
-   vector<node> scc;
    while (it != node_graph.end()) {
        node* tmp = &it->second;
        if (tmp->isVisited()) {} //do nothing
        else {
-           descend_rev(tmp, scc);
-           organizeScc(scc);
-           eval_sccs.insert(pair<int,vector<node>>(post_order,scc));
-           scc.clear();
+           descend_rev(tmp);
        }
        it++;
    }
-   clear_visits(); //clear the visited var of the nodes
+    clear_visits(); //clear the visited var of the nodes
+    clear_visits2();
+}
+
+void graph::descend_rev(node* tmp) {
+    // cout << "descend:" << post_order << endl;
+    set<int> my_nodes;
+    tmp->markVisited();
+    my_nodes = tmp->getFriendNodes_rev();
+    for (int id : my_nodes) {
+        node* tmp2 = &node_graph.find(id)->second;
+        if (tmp2->isVisited()) {} //do nothing
+        else descend_rev(tmp2);
+    }
+    tmp->setPostOrder(post_order);
+    po_nodes.insert(pair<int,node>(post_order,*tmp));
+    post_order++;
+    return;
 }
 
 void graph::organizeScc(vector<node> &my_scc) {
@@ -135,37 +146,6 @@ void graph::organizeScc(vector<node> &my_scc) {
     }
 }
 
-
-
-
-void graph::descend_rev(node* tmp, vector<node> &scc) {
-    // cout << "descend:" << post_order << endl;
-    set<int> my_nodes;
-    tmp->markVisited();
-    my_nodes = tmp->getFriendNodes_rev();
-    for (int id : my_nodes) {
-        node* tmp2 = &node_graph.find(id)->second;
-        if (tmp2->isVisited()) {} //do nothing
-        else descend_rev(tmp2, scc);
-    }
-    tmp->setPostOrder(post_order);
-    post_order++;
-    scc.push_back(*tmp);
-    return;
-}
-
-void graph::descend(node* tmp) {
-    // cout << "descend:" << post_order << endl;
-    set<int> my_nodes;
-    tmp->markVisited();
-    my_nodes = tmp->getFriendNodes();
-    for (int id : my_nodes) {
-        node* tmp2 = &node_graph.find(id)->second;
-        if (tmp2->isVisited()) {} //do nothing
-        else descend(tmp2);
-    }
-    return;
-}
 
 void graph::output_sccs() {
     cout<< "SCCs\n";
@@ -195,6 +175,14 @@ void graph::output_pos() {
 void graph::clear_visits() {
     map<int, node>::iterator it = node_graph.begin();
     while (it != node_graph.end()) {
+       it->second.markNotVisited();
+       it++;
+   }
+}
+
+void graph::clear_visits2() {
+    map<int, node>::iterator it = po_nodes.begin();
+    while (it != po_nodes.end()) {
        it->second.markNotVisited();
        it++;
    }
